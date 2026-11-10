@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Video & Disegni">
+<title>Video & Disegni</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: #fff7ec; font-family: -apple-system, Helvetica, Arial, sans-serif; overflow: hidden; -webkit-user-select: none; user-select: none; }
+  .screen { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+  .screen.on { display: block; }
+  /* Home */
+  #home { text-align: center; padding-top: 12%; }
+  #home h1 { font-size: 34px; color: #333; margin: 0 0 40px; }
+  .bigbtn { display: inline-block; width: 40%; max-width: 300px; margin: 0 3%; padding: 40px 0; border-radius: 28px; font-size: 30px; font-weight: bold; color: #fff; border: 0; }
+  .b-video { background: #ff5a5f; }
+  .b-draw { background: #3fa7f5; }
+  .bigbtn span { display: block; font-size: 70px; margin-bottom: 10px; }
+  /* Top bar */
+  .bar { height: 64px; padding: 8px 10px; background: #fff; border-bottom: 2px solid #f0e2cf; white-space: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .bar button { height: 46px; padding: 0 18px; margin-right: 6px; border-radius: 23px; border: 0; font-size: 18px; font-weight: bold; background: #f0e2cf; color: #333; vertical-align: middle; }
+  .bar button.home { background: #333; color: #fff; }
+  .bar button.sel { background: #ff5a5f; color: #fff; }
+  /* Video */
+  #player { position: absolute; top: 64px; left: 0; right: 0; bottom: 0; background: #000; }
+  #player iframe { width: 100%; height: 100%; border: 0; }
+  #novideo { color: #fff; text-align: center; padding-top: 20%; font-size: 22px; }
+  /* Draw */
+  #canvas { position: absolute; top: 64px; left: 0; right: 0; bottom: 0; background: #fff; touch-action: none; }
+  .color { width: 46px; padding: 0 !important; border: 4px solid #fff !important; }
+  .color.sel { border-color: #333 !important; }
+</style>
+</head>
+<body>
+
+<!-- ========= CANALI: modifica solo questa lista =========
+     "id" è l'ID del canale YouTube (inizia con UC...).
+     "nome" è il testo che vede tua figlia sul bottone.     -->
+<script>
+var CANALI = [
+  { nome: "CoComelon",    id: "UCx1j2WcHMRotdFvBBSr8hAg" },
+  { nome: "Alman Kids",   id: "UCmww4L-_WYqeFYmBKRpD7AA" },
+  { nome: "Little Angel", id: "UCSKMTnvDepWI3OEaz-u1TXw" }
+];
+</script>
+<!-- ===================================================== -->
+
+<div id="home" class="screen on">
+  <h1>Cosa facciamo?</h1>
+  <button class="bigbtn b-video" onclick="apriVideo()"><span>📺</span>Video</button>
+  <button class="bigbtn b-draw" onclick="apriDisegno()"><span>🎨</span>Disegno</button>
+</div>
+
+<div id="video" class="screen">
+  <div class="bar" id="videobar"><button class="home" onclick="vaiHome()">🏠</button></div>
+  <div id="player"><div id="novideo">Scegli un canale 👆</div></div>
+</div>
+
+<div id="draw" class="screen">
+  <div class="bar" id="drawbar">
+    <button class="home" onclick="vaiHome()">🏠</button>
+  </div>
+  <canvas id="canvas"></canvas>
+</div>
+
+<script>
+function $(id) { return document.getElementById(id); }
+function mostra(id) {
+  var s = document.querySelectorAll('.screen');
+  for (var i = 0; i < s.length; i++) { s[i].className = 'screen'; }
+  $(id).className = 'screen on';
+}
+function vaiHome() {
+  $('player').innerHTML = '<div id="novideo">Scegli un canale 👆</div>';
+  mostra('home');
+}
+
+/* ---------- VIDEO ---------- */
+var barraFatta = false;
+function apriVideo() {
+  mostra('video');
+  if (barraFatta) return;
+  barraFatta = true;
+  var bar = $('videobar');
+  for (var i = 0; i < CANALI.length; i++) {
+    (function (c) {
+      var b = document.createElement('button');
+      b.appendChild(document.createTextNode(c.nome));
+      b.onclick = function () {
+        var bs = bar.querySelectorAll('button');
+        for (var j = 0; j < bs.length; j++) { if (bs[j].className !== 'home') bs[j].className = ''; }
+        b.className = 'sel';
+        suona(c.id);
+      };
+      bar.appendChild(b);
+    })(CANALI[i]);
+  }
+}
+function suona(channelId) {
+  // La playlist "caricamenti" di un canale ha lo stesso ID con UU al posto di UC.
+  var lista = 'UU' + channelId.substring(2);
+  var src = 'https://www.youtube-nocookie.com/embed/videoseries?list=' + lista +
+            '&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&fs=0';
+  $('player').innerHTML = '<iframe src="' + src + '" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+}
+
+/* ---------- DISEGNO ---------- */
+var COLORI = ['#222222', '#ff3b30', '#ff9500', '#ffcc00', '#34c759', '#007aff', '#af52de', '#ff80c0', '#8b5a2b'];
+var colore = COLORI[0], spessore = 10, gomma = false;
+var canvas = $('canvas'), ctx = canvas.getContext('2d');
+var disegnoPronto = false;
+
+function apriDisegno() {
+  mostra('draw');
+  if (!disegnoPronto) { preparaDisegno(); disegnoPronto = true; }
+  ridimensiona();
+}
+function preparaDisegno() {
+  var bar = $('drawbar');
+  for (var i = 0; i < COLORI.length; i++) {
+    (function (c, i) {
+      var b = document.createElement('button');
+      b.className = 'color' + (i === 0 ? ' sel' : '');
+      b.style.background = c;
+      b.onclick = function () { colore = c; gomma = false; seleziona(b); };
+      bar.appendChild(b);
+    })(COLORI[i], i);
+  }
+  aggiungi('✏️ Fine', function (b) { spessore = 5; });
+  aggiungi('🖌️ Grosso', function (b) { spessore = 22; });
+  aggiungi('🧽 Gomma', function (b) { gomma = true; seleziona(b); });
+  aggiungi('🗑️ Cancella tutto', function () {
+    if (confirm('Cancello tutto il disegno?')) { pulisci(); }
+  });
+
+  canvas.addEventListener('touchstart', inizio, false);
+  canvas.addEventListener('touchmove', muovi, false);
+  canvas.addEventListener('touchend', fine, false);
+  canvas.addEventListener('mousedown', inizio, false);
+  canvas.addEventListener('mousemove', muovi, false);
+  window.addEventListener('mouseup', fine, false);
+  window.addEventListener('resize', ridimensiona, false);
+}
+function aggiungi(testo, fn) {
+  var b = document.createElement('button');
+  b.appendChild(document.createTextNode(testo));
+  b.onclick = function () { fn(b); };
+  $('drawbar').appendChild(b);
+}
+function seleziona(btn) {
+  var bs = $('drawbar').querySelectorAll('button');
+  for (var i = 0; i < bs.length; i++) { bs[i].className = bs[i].className.replace(' sel', '').replace(/^sel$/, ''); }
+  btn.className = (btn.className ? btn.className + ' ' : '') + 'sel';
+}
+function pulisci() {
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+function ridimensiona() {
+  var r = window.devicePixelRatio || 1;
+  var w = canvas.clientWidth, h = canvas.clientHeight;
+  if (!w || !h) return;
+  var copia = null;
+  if (canvas.width) { copia = document.createElement('canvas'); copia.width = canvas.width; copia.height = canvas.height; copia.getContext('2d').drawImage(canvas, 0, 0); }
+  canvas.width = w * r; canvas.height = h * r;
+  ctx.setTransform(r, 0, 0, r, 0, 0);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+  if (copia) ctx.drawImage(copia, 0, 0, copia.width / r, copia.height / r);
+}
+var giu = false, ultimo = null;
+function punto(e) {
+  var rect = canvas.getBoundingClientRect();
+  var t = e.touches ? e.touches[0] : e;
+  return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+}
+function inizio(e) { e.preventDefault(); giu = true; ultimo = punto(e); traccia(ultimo, ultimo); }
+function muovi(e) { if (!giu) return; e.preventDefault(); var p = punto(e); traccia(ultimo, p); ultimo = p; }
+function fine() { giu = false; }
+function traccia(a, b) {
+  ctx.strokeStyle = gomma ? '#ffffff' : colore;
+  ctx.lineWidth = gomma ? 34 : spessore;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x + 0.01, b.y); ctx.stroke();
+}
+
+// blocca lo zoom e il rimbalzo della pagina
+document.addEventListener('gesturestart', function (e) { e.preventDefault(); }, false);
+document.addEventListener('touchmove', function (e) { if (e.target === canvas) e.preventDefault(); }, { passive: false });
+</script>
+</body>
+</html>
