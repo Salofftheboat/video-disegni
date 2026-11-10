@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prova video</title>
+<style>body{margin:0;font-family:-apple-system,Helvetica,sans-serif;background:#222;color:#fff}
+.b{display:inline-block;margin:6px;padding:14px 20px;font-size:20px;font-weight:bold;border:0;border-radius:12px;background:#ff5a5f;color:#fff;text-decoration:none}
+#p{position:absolute;top:90px;left:0;right:0;bottom:0}#p iframe{width:100%;height:100%;border:0}</style></head><body>
+<button class="b" onclick="v(1)">1</button>
+<button class="b" onclick="v(2)">2</button>
+<button class="b" onclick="v(3)">3</button>
+<button class="b" onclick="v(4)">4</button>
+<a class="b" href="https://m.youtube.com/playlist?list=UUx1j2WcHMRotdFvBBSr8hAg">5</a>
+<div id="p"></div>
+<script>
+var L='UUx1j2WcHMRotdFvBBSr8hAg';
+function v(n){
+  var s;
+  if(n==1) s='https://www.youtube-nocookie.com/embed/videoseries?list='+L+'&rel=0&playsinline=1';
+  if(n==2) s='https://www.youtube.com/embed/videoseries?list='+L+'&rel=0&playsinline=1';
+  if(n==3) s='https://www.youtube.com/embed/videoseries?list='+L;
+  if(n==4) s='https://www.youtube.com/embed/?listType=playlist&list='+L+'&playsinline=1';
+  document.getElementById('p').innerHTML='<iframe src="'+s+'" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+}
+</script></body></html>
