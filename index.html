@@ -25,7 +25,12 @@
   .bar button.home { background: #333; color: #fff; }
   .bar button.sel { background: #ff5a5f; color: #fff; }
   /* Video */
-  #player { position: absolute; top: 64px; left: 0; right: 0; bottom: 0; background: #000; }
+  #videobar { height: 96px; padding: 6px 10px; }
+  #videobar button.home { height: 80px; width: 80px; padding: 0; border-radius: 40px; font-size: 34px; }
+  #videobar button.logo { width: 80px; height: 80px; padding: 0; margin-right: 14px; border-radius: 40px; border: 5px solid #fff; background: #fff; overflow: hidden; }
+  #videobar button.logo img { width: 100%; height: 100%; border-radius: 40px; display: block; }
+  #videobar button.logo.sel { border-color: #ff5a5f; background: #ff5a5f; }
+  #player { position: absolute; top: 96px; left: 0; right: 0; bottom: 0; background: #000; }
   #player iframe { width: 100%; height: 100%; border: 0; }
   #novideo { color: #fff; text-align: center; padding-top: 20%; font-size: 22px; }
   /* Draw */
@@ -38,12 +43,16 @@
 
 <!-- ========= CANALI: modifica solo questa lista =========
      "id" è l'ID del canale YouTube (inizia con UC...).
-     "nome" è il testo che vede tua figlia sul bottone.     -->
+     "logo" è l'immagine del canale che vede tua figlia sul bottone.
+     "nome" serve solo come descrizione.                       -->
 <script>
 var CANALI = [
-  { nome: "CoComelon",    id: "UCx1j2WcHMRotdFvBBSr8hAg" },
-  { nome: "Alman Kids",   id: "UCmww4L-_WYqeFYmBKRpD7AA" },
-  { nome: "Little Angel", id: "UCSKMTnvDepWI3OEaz-u1TXw" }
+  { nome: "CoComelon",    id: "UCx1j2WcHMRotdFvBBSr8hAg",
+    logo: "https://yt3.googleusercontent.com/D_fYpWDxL_E-X9DGcdT4khDh44TJFj3-aNk9_J9yYtnWEVo43_FJX2mTwVgvSmrCjeDDNTNyng=s176-c-k-c0x00ffffff-no-rj" },
+  { nome: "Alman Kids",   id: "UCmww4L-_WYqeFYmBKRpD7AA",
+    logo: "https://yt3.googleusercontent.com/M4IpsvK6U5q-ZAawcMepaF_VzpfzRjDmHKmtCprYOUD6JkQqVQ80CxUxn2CYeXz9jk6lK-0m=s176-c-k-c0x00ffffff-no-rj" },
+  { nome: "Little Angel", id: "UCSKMTnvDepWI3OEaz-u1TXw",
+    logo: "https://yt3.googleusercontent.com/jiw_5NvU32DxcZ725yeetJh1a3O7VIRS6tYJgn0R5CukrgXF7IX71eTBNwon-TcpcV1xGHaqSw=s176-c-k-c0x00ffffff-no-rj" }
 ];
 </script>
 <!-- ===================================================== -->
@@ -88,11 +97,15 @@ function apriVideo() {
   for (var i = 0; i < CANALI.length; i++) {
     (function (c) {
       var b = document.createElement('button');
-      b.appendChild(document.createTextNode(c.nome));
+      b.className = 'logo';
+      var img = document.createElement('img');
+      img.src = c.logo;
+      img.alt = c.nome;
+      b.appendChild(img);
       b.onclick = function () {
-        var bs = bar.querySelectorAll('button');
-        for (var j = 0; j < bs.length; j++) { if (bs[j].className !== 'home') bs[j].className = ''; }
-        b.className = 'sel';
+        var bs = bar.querySelectorAll('button.logo');
+        for (var j = 0; j < bs.length; j++) { bs[j].className = 'logo'; }
+        b.className = 'logo sel';
         suona(c.id);
       };
       bar.appendChild(b);
